@@ -41,6 +41,29 @@ struct Pdb
     void clear_all()
     {
         std::fill( m_part_ids.begin(), m_part_ids.end(), ABC_PART_ID_NONE );
+        invalidate_stats();
+    }
+
+    void set_stats( int NumParts, int CutSize )
+    {
+        m_num_parts = NumParts;
+        m_cut_size = CutSize;
+    }
+
+    void invalidate_stats()
+    {
+        m_num_parts = -1;
+        m_cut_size = -1;
+    }
+
+    int num_parts() const
+    {
+        return m_num_parts;
+    }
+
+    int cut_size() const
+    {
+        return m_cut_size;
     }
 
 private:
@@ -52,6 +75,8 @@ private:
 
 private:
     std::vector<part_id> m_part_ids;
+    int m_num_parts = -1;
+    int m_cut_size = -1;
 };
 
 ABC_NAMESPACE_CXX_HEADER_END

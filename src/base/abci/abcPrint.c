@@ -269,6 +269,8 @@ float Abc_NtkGetAreaSpecial2( Abc_Ntk_t * pNtk )
 void Abc_NtkPrintStats( Abc_Ntk_t * pNtk, int fFactored, int fSaveBest, int fDumpResult, int fUseLutLib, int fPrintMuxes, int fPower, int fGlitch, int fSkipBuf, int fSkipSmall, int fPrintMem )
 {
     int nSingles = fSkipBuf ? Abc_NtkGetBufNum(pNtk) : 0;
+    int nParts = 0, CutSize = 0, MinSize = 0, MaxSize = 0;
+    float AvgSize = 0.0f;
     if ( fPrintMuxes && Abc_NtkIsStrash(pNtk) )
     {
         extern int Abc_NtkCountMuxes( Abc_Ntk_t * pNtk );
@@ -391,6 +393,42 @@ void Abc_NtkPrintStats( Abc_Ntk_t * pNtk, int fFactored, int fSaveBest, int fDum
     if ( fPrintMem )
         Abc_Print( 1,"  mem =%5.2f MB", Abc_NtkMemory(pNtk)/(1<<20) );
     Abc_Print( 1,"\n" );
+    if ( Abc_NtkGetPartStats( pNtk, &nParts, &CutSize, &AvgSize, &MinSize, &MaxSize ) )
+    {
+#ifdef WIN32
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 11 ); // bright cyan
+        Abc_Print( 1,"%-30s:", "pdb" );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+        Abc_Print( 1," part =");
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 10 ); // bright green
+        Abc_Print( 1,"%3d", nParts );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+        Abc_Print( 1,"  cut =");
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 14 ); // bright yellow
+        Abc_Print( 1,"%5d", CutSize );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+        Abc_Print( 1,"  pavg =");
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 10 ); // bright green
+        Abc_Print( 1,"%5.1f", AvgSize );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+        Abc_Print( 1,"  pmin =");
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 10 ); // bright green
+        Abc_Print( 1,"%5d", MinSize );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+        Abc_Print( 1,"  pmax =");
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 10 ); // bright green
+        Abc_Print( 1,"%5d", MaxSize );
+        SetConsoleTextAttribute( GetStdHandle(STD_OUTPUT_HANDLE), 7 );  // normal
+#else
+        Abc_Print( 1,"%s%-30s:%s", "\033[1;36m", "pdb", "\033[0m" );
+        Abc_Print( 1," part =%s%3d%s", "\033[1;32m", nParts, "\033[0m" );
+        Abc_Print( 1,"  cut =%s%5d%s", "\033[1;33m", CutSize, "\033[0m" );
+        Abc_Print( 1,"  pavg =%s%5.1f%s", "\033[1;32m", AvgSize, "\033[0m" );
+        Abc_Print( 1,"  pmin =%s%5d%s", "\033[1;32m", MinSize, "\033[0m" );
+        Abc_Print( 1,"  pmax =%s%5d%s", "\033[1;32m", MaxSize, "\033[0m" );
+#endif
+        Abc_Print( 1,"\n" );
+    }
 /*
     // print the statistic into a file
     if ( fDumpResult )
