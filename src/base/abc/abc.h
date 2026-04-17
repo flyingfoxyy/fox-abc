@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "misc/vec/vec.h"
 #include "aig/hop/hop.h"
@@ -118,6 +119,11 @@ typedef struct Abc_Aig_t_       Abc_Aig_t;
 typedef struct Abc_ManTime_t_   Abc_ManTime_t;
 typedef struct Abc_ManCut_t_    Abc_ManCut_t;
 typedef struct Abc_Time_t_      Abc_Time_t;
+typedef struct Pdb              Pdb;
+
+typedef uint8_t                 part_id;
+
+#define ABC_PART_ID_NONE        ((part_id)0xFF)
 
 struct Abc_Time_t_
 {
@@ -137,6 +143,7 @@ struct Abc_Obj_t_     // 48/72 bytes (32-bits/64-bits)
     unsigned          fPhase  :  1;  // the flag to mark the phase of equivalent node
     unsigned          fExor   :  1;  // marks AIG node that is a root of EXOR
     unsigned          fPersist:  1;  // marks the persistant AIG node
+    unsigned          fCutNet :  1;  // marks an object with a fanout in another partition
     unsigned          fCompl0 :  1;  // complemented attribute of the first fanin in the AIG
     unsigned          fCompl1 :  1;  // complemented attribute of the second fanin in the AIG 
     unsigned          Level   : 20;  // the level of the node
@@ -191,6 +198,7 @@ struct Abc_Ntk_t_
     void *            pManFunc;      // functionality manager (AIG manager, BDD manager, or memory manager for SOPs)
     Abc_ManTime_t *   pManTime;      // the timing manager (for mapped networks) stores arrival/required times for all nodes
     void *            pManCut;       // the cut manager (for AIGs) stores information about the cuts computed for the nodes
+    Pdb *             pPdb;          // physical database storing partition IDs by object ID
     float             AndGateDelay;  // an average estimated delay of one AND gate
     int               LevelMax;      // maximum number of levels
     Vec_Int_t *       vLevelsR;      // level in the reverse topological order (for AIGs)
@@ -339,11 +347,16 @@ static inline Abc_Ntk_t * Abc_ObjModel( Abc_Obj_t * pObj )           { assert( p
 static inline void *      Abc_ObjData( Abc_Obj_t * pObj )            { return pObj->pData;              }
 static inline Abc_Obj_t * Abc_ObjEquiv( Abc_Obj_t * pObj )           { return (Abc_Obj_t *)pObj->pData; }
 static inline Abc_Obj_t * Abc_ObjCopyCond( Abc_Obj_t * pObj )        { return Abc_ObjRegular(pObj)->pCopy? Abc_ObjNotCond(Abc_ObjRegular(pObj)->pCopy, Abc_ObjIsComplement(pObj)) : NULL;  }
+static inline Pdb *       Abc_NtkPdb( Abc_Ntk_t * pNtk )             { return pNtk->pPdb;               }
 
 // setting data members of the network
 static inline void        Abc_ObjSetLevel( Abc_Obj_t * pObj, int Level )         { pObj->Level =  Level;    } 
 static inline void        Abc_ObjSetCopy( Abc_Obj_t * pObj, Abc_Obj_t * pCopy )  { pObj->pCopy =  pCopy;    } 
 static inline void        Abc_ObjSetData( Abc_Obj_t * pObj, void * pData )       { pObj->pData =  pData;    } 
+static inline int         Abc_PartIdIsValid( part_id PartId )                     { return PartId != ABC_PART_ID_NONE; }
+static inline int         Abc_ObjIsCutNet( Abc_Obj_t * pObj )                     { return pObj->fCutNet;    }
+static inline void        Abc_ObjSetCutNet( Abc_Obj_t * pObj, int fCutNet )       { pObj->fCutNet = (fCutNet != 0); }
+static inline void        Abc_ObjClearCutNet( Abc_Obj_t * pObj )                  { pObj->fCutNet = 0;       }
 
 // checking the object type
 static inline int         Abc_ObjIsNone( Abc_Obj_t * pObj )          { return pObj->Type == ABC_OBJ_NONE;    }
@@ -544,6 +557,17 @@ static inline void        Abc_ObjSetMvVar( Abc_Obj_t * pObj, void * pV) { Vec_At
 ////////////////////////////////////////////////////////////////////////
 ///                    FUNCTION DECLARATIONS                         ///
 ////////////////////////////////////////////////////////////////////////
+
+/*=== abcPdb.cpp =========================================================*/
+extern ABC_DLL part_id            Abc_NtkGetPartId( Abc_Ntk_t * pNtk, int ObjId );
+extern ABC_DLL void               Abc_NtkSetPartId( Abc_Ntk_t * pNtk, int ObjId, part_id PartId );
+extern ABC_DLL void               Abc_NtkClearPartId( Abc_Ntk_t * pNtk, int ObjId );
+extern ABC_DLL void               Abc_NtkClearPartIds( Abc_Ntk_t * pNtk );
+extern ABC_DLL void               Abc_NtkUpdateCutNets( Abc_Ntk_t * pNtk );
+extern ABC_DLL part_id            Abc_ObjGetPartId( Abc_Obj_t * pObj );
+extern ABC_DLL void               Abc_ObjSetPartId( Abc_Obj_t * pObj, part_id PartId );
+extern ABC_DLL void               Abc_ObjClearPartId( Abc_Obj_t * pObj );
+extern ABC_DLL void               Abc_ObjUpdateCutNet( Abc_Obj_t * pObj );
 
 /*=== abcAig.c ==========================================================*/
 extern ABC_DLL Abc_Aig_t *        Abc_AigAlloc( Abc_Ntk_t * pNtk );

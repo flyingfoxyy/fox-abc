@@ -370,6 +370,7 @@ void Abc_NtkFinalize( Abc_Ntk_t * pNtk, Abc_Ntk_t * pNtkNew )
         Abc_NtkTransferPhases( pNtkNew, pNtk );
     if ( pNtk->pWLoadUsed )
         pNtkNew->pWLoadUsed = Abc_UtilStrsav( pNtk->pWLoadUsed );
+    Abc_NtkUpdateCutNets( pNtkNew );
 }
 
 /**Function*************************************************************
@@ -483,7 +484,11 @@ Abc_Ntk_t * Abc_NtkDup( Abc_Ntk_t * pNtk )
     {
         // copy the AND gates
         Abc_AigForEachAnd( pNtk, pObj, i )
+        {
             pObj->pCopy = Abc_AigAnd( (Abc_Aig_t *)pNtkNew->pManFunc, Abc_ObjChild0Copy(pObj), Abc_ObjChild1Copy(pObj) );
+            pObj->pCopy->fCutNet = pObj->fCutNet;
+            Abc_ObjSetPartId( pObj->pCopy, Abc_ObjGetPartId(pObj) );
+        }
         // relink the choice nodes
         Abc_AigForEachAnd( pNtk, pObj, i )
             if ( pObj->pData )
@@ -529,6 +534,7 @@ Abc_Ntk_t * Abc_NtkDup( Abc_Ntk_t * pNtk )
         Abc_NtkTransferPhases( pNtkNew, pNtk );
     if ( pNtk->pWLoadUsed )
         pNtkNew->pWLoadUsed = Abc_UtilStrsav( pNtk->pWLoadUsed );
+    Abc_NtkUpdateCutNets( pNtkNew );
     // check correctness
     if ( !Abc_NtkCheck( pNtkNew ) )
         fprintf( stdout, "Abc_NtkDup(): Network check has failed.\n" );
@@ -569,6 +575,7 @@ Abc_Ntk_t * Abc_NtkDupDfs( Abc_Ntk_t * pNtk )
         Abc_NtkTransferPhases( pNtkNew, pNtk );
     if ( pNtk->pWLoadUsed )
         pNtkNew->pWLoadUsed = Abc_UtilStrsav( pNtk->pWLoadUsed );
+    Abc_NtkUpdateCutNets( pNtkNew );
     // check correctness
     if ( !Abc_NtkCheck( pNtkNew ) )
         fprintf( stdout, "Abc_NtkDup(): Network check has failed.\n" );
@@ -613,6 +620,7 @@ Abc_Ntk_t * Abc_NtkDupDfsNoBarBufs( Abc_Ntk_t * pNtk )
         Abc_NtkTransferPhases( pNtkNew, pNtk );
     if ( pNtk->pWLoadUsed )
         pNtkNew->pWLoadUsed = Abc_UtilStrsav( pNtk->pWLoadUsed );
+    Abc_NtkUpdateCutNets( pNtkNew );
     // check correctness
     if ( !Abc_NtkCheck( pNtkNew ) )
         fprintf( stdout, "Abc_NtkDup(): Network check has failed.\n" );
@@ -1497,6 +1505,8 @@ void Abc_NtkDelete( Abc_Ntk_t * pNtk )
     // free the timing manager
     if ( pNtk->pManTime )
         Abc_ManTimeStop( pNtk->pManTime );
+    // free the physical partition database
+    Abc_PdbFree( pNtk->pPdb );
     Vec_IntFreeP( &pNtk->vPhases );
     // start the functionality manager
     if ( Abc_NtkIsStrash(pNtk) )
@@ -2621,4 +2631,3 @@ Abc_Ntk_t * Abc_NtkCreateFromGias( char * pName, Vec_Ptr_t * vGias, Gia_Man_t * 
 
 
 ABC_NAMESPACE_IMPL_END
-

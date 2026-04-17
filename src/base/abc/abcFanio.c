@@ -94,6 +94,7 @@ void Abc_ObjAddFanin( Abc_Obj_t * pObj, Abc_Obj_t * pFanin )
     Vec_IntPushMem( pObj->pNtk->pMmStep, &pFaninR->vFanouts, pObj->Id    );
     if ( Abc_ObjIsComplement(pFanin) )
         Abc_ObjSetFaninC( pObj, Abc_ObjFaninNum(pObj)-1 );
+    Abc_ObjUpdateCutNet( pFaninR );
 }
 
 
@@ -124,6 +125,7 @@ void Abc_ObjDeleteFanin( Abc_Obj_t * pObj, Abc_Obj_t * pFanin )
         printf( "The obj %d is not found among the fanouts of obj %d ...\n", pObj->Id, pFanin->Id );
         return;
     }
+    Abc_ObjUpdateCutNet( pFanin );
 }
 
 
@@ -207,6 +209,8 @@ void Abc_ObjPatchFanin( Abc_Obj_t * pObj, Abc_Obj_t * pFaninOld, Abc_Obj_t * pFa
 //        return;
     }
     Vec_IntPushMem( pObj->pNtk->pMmStep, &pFaninNewR->vFanouts, pObj->Id );
+    Abc_ObjUpdateCutNet( pFaninOld );
+    Abc_ObjUpdateCutNet( pFaninNewR );
 }
 
 /**Function*************************************************************
@@ -275,6 +279,8 @@ Abc_Obj_t * Abc_ObjInsertBetween( Abc_Obj_t * pNodeIn, Abc_Obj_t * pNodeOut, Abc
     Vec_IntWriteEntry( &pNodeIn->vFanouts, iFanoutIndex, pNodeNew->Id );
     // update the fanin of pNodeOut
     Vec_IntWriteEntry( &pNodeOut->vFanins, iFaninIndex, pNodeNew->Id );
+    Abc_ObjUpdateCutNet( pNodeIn );
+    Abc_ObjUpdateCutNet( pNodeNew );
     return pNodeNew;
 }
 
@@ -387,4 +393,3 @@ int Abc_ObjFanoutFaninNum( Abc_Obj_t * pFanout, Abc_Obj_t * pFanin )
 
 
 ABC_NAMESPACE_IMPL_END
-

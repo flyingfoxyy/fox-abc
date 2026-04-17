@@ -47,6 +47,8 @@ ABC_NAMESPACE_HEADER_START
 ///                    FUNCTION DECLARATIONS                         ///
 ////////////////////////////////////////////////////////////////////////
 
+extern ABC_DLL Pdb *               Abc_PdbAlloc();
+extern ABC_DLL void                Abc_PdbFree( Pdb * pPdb );
 
 
 ABC_NAMESPACE_HEADER_END
@@ -56,5 +58,4 @@ ABC_NAMESPACE_HEADER_END
 ////////////////////////////////////////////////////////////////////////
 ///                       END OF FILE                                ///
 ////////////////////////////////////////////////////////////////////////
-
 

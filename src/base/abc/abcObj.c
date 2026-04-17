@@ -186,6 +186,8 @@ void Abc_NtkDeleteObj( Abc_Obj_t * pObj )
         Abc_ObjDeleteFanin( pObj, (Abc_Obj_t *)vNodes->pArray[i] );
     Vec_PtrFree( vNodes );
     // remove from the list of objects
+    Abc_ObjClearPartId( pObj );
+    Abc_ObjClearCutNet( pObj );
     Vec_PtrWriteEntry( pNtk->vObjs, pObj->Id, NULL );
     pObj->Id = (1<<26)-1;
     pNtk->nObjCounts[pObj->Type]--;
@@ -255,6 +257,8 @@ void Abc_NtkDeleteObjPo( Abc_Obj_t * pObj )
     // delete fanins
     Abc_ObjDeleteFanin( pObj, Abc_ObjFanin0(pObj) );
     // remove from the list of objects
+    Abc_ObjClearPartId( pObj );
+    Abc_ObjClearCutNet( pObj );
     Vec_PtrWriteEntry( pObj->pNtk->vObjs, pObj->Id, NULL );
     pObj->Id = (1<<26)-1;
     pObj->pNtk->nObjCounts[pObj->Type]--;
@@ -394,6 +398,8 @@ Abc_Obj_t * Abc_NtkDupObj( Abc_Ntk_t * pNtkNew, Abc_Obj_t * pObj, int fCopyName 
     else if ( Abc_ObjIsLatch(pObj) ) // copy the reset value
         pObjNew->pData = pObj->pData;
     pObjNew->fPersist = pObj->fPersist;
+    pObjNew->fCutNet  = pObj->fCutNet;
+    Abc_ObjSetPartId( pObjNew, Abc_ObjGetPartId(pObj) );
     // transfer HAIG
 //    pObjNew->pEquiv = pObj->pEquiv;
     // remember the new node in the old node
@@ -444,6 +450,7 @@ Abc_Obj_t * Abc_NtkCloneObj( Abc_Obj_t * pObj )
     Abc_Obj_t * pClone, * pFanin;
     int i;
     pClone = Abc_NtkCreateObj( pObj->pNtk, (Abc_ObjType_t)pObj->Type );   
+    Abc_ObjSetPartId( pClone, Abc_ObjGetPartId(pObj) );
     Abc_ObjForEachFanin( pObj, pFanin, i )
         Abc_ObjAddFanin( pClone, pFanin );
     return pClone;
@@ -1073,4 +1080,3 @@ void Abc_NodeComplementInput( Abc_Obj_t * pNode, Abc_Obj_t * pFanin )
 ////////////////////////////////////////////////////////////////////////
 
 ABC_NAMESPACE_IMPL_END
-
