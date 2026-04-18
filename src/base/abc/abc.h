@@ -564,8 +564,10 @@ extern ABC_DLL void               Abc_NtkSetPartId( Abc_Ntk_t * pNtk, int ObjId,
 extern ABC_DLL void               Abc_NtkClearPartId( Abc_Ntk_t * pNtk, int ObjId );
 extern ABC_DLL void               Abc_NtkClearPartIds( Abc_Ntk_t * pNtk );
 extern ABC_DLL void               Abc_NtkUpdateCutNets( Abc_Ntk_t * pNtk );
-extern ABC_DLL void               Abc_NtkSetPartStats( Abc_Ntk_t * pNtk, int NumParts, int CutSize );
-extern ABC_DLL int                Abc_NtkGetPartStats( Abc_Ntk_t * pNtk, int * pNumParts, int * pCutSize, float * pAvgSize, int * pMinSize, int * pMaxSize );
+extern ABC_DLL int                Abc_NtkComputeCutSize( Abc_Ntk_t * pNtk );
+extern ABC_DLL int                Abc_NtkComputeHopNum( Abc_Ntk_t * pNtk );
+extern ABC_DLL void               Abc_NtkSetPartStats( Abc_Ntk_t * pNtk, int NumParts, int CutSize, int HopNum );
+extern ABC_DLL int                Abc_NtkGetPartStats( Abc_Ntk_t * pNtk, int * pNumParts, int * pCutSize, int * pHopNum, float * pAvgSize, int * pMinSize, int * pMaxSize );
 extern ABC_DLL part_id            Abc_ObjGetPartId( Abc_Obj_t * pObj );
 extern ABC_DLL void               Abc_ObjSetPartId( Abc_Obj_t * pObj, part_id PartId );
 extern ABC_DLL void               Abc_ObjClearPartId( Abc_Obj_t * pObj );

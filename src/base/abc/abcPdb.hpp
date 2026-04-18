@@ -44,16 +44,18 @@ struct Pdb
         invalidate_stats();
     }
 
-    void set_stats( int NumParts, int CutSize )
+    void set_stats( int NumParts, int CutSize, int HopNum )
     {
         m_num_parts = NumParts;
         m_cut_size = CutSize;
+        m_hop_num = HopNum;
     }
 
     void invalidate_stats()
     {
         m_num_parts = -1;
         m_cut_size = -1;
+        m_hop_num = -1;
     }
 
     int num_parts() const
@@ -64,6 +66,11 @@ struct Pdb
     int cut_size() const
     {
         return m_cut_size;
+    }
+
+    int hop_num() const
+    {
+        return m_hop_num;
     }
 
 private:
@@ -77,6 +84,7 @@ private:
     std::vector<part_id> m_part_ids;
     int m_num_parts = -1;
     int m_cut_size = -1;
+    int m_hop_num = -1;
 };
 
 ABC_NAMESPACE_CXX_HEADER_END
