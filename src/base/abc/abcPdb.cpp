@@ -188,6 +188,7 @@ int Abc_NtkComputeCutSize( Abc_Ntk_t * pNtk )
 int Abc_NtkComputeHopNum( Abc_Ntk_t * pNtk )
 {
     std::vector<int> HopLevels;
+    Vec_Ptr_t * vNodes;
     Abc_Obj_t * pObj;
     int i;
     int HopNum = 0;
@@ -196,14 +197,19 @@ int Abc_NtkComputeHopNum( Abc_Ntk_t * pNtk )
         return -1;
 
     HopLevels.resize( Abc_NtkObjNumMax(pNtk), 0 );
+    vNodes = Abc_NtkDfs( pNtk, 1 );
 
-    Abc_NtkForEachObj( pNtk, pObj, i )
+    Vec_PtrForEachEntry( Abc_Obj_t *, vNodes, pObj, i )
     {
         if ( !Abc_ObjIsPartStatVertex( pObj ) )
             continue;
         if ( !Abc_NtkUpdateHopLevel( pObj, HopLevels, HopNum ) )
+        {
+            Vec_PtrFree( vNodes );
             return -1;
+        }
     }
+    Vec_PtrFree( vNodes );
     return HopNum;
 }
 
