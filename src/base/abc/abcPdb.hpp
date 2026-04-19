@@ -51,11 +51,17 @@ struct Pdb
         m_hop_num = HopNum;
     }
 
+    void set_balance_pct( int BalancePct )
+    {
+        m_balance_pct = BalancePct;
+    }
+
     void invalidate_stats()
     {
         m_num_parts = -1;
         m_cut_size = -1;
         m_hop_num = -1;
+        m_balance_pct = -1;
     }
 
     int num_parts() const
@@ -73,6 +79,11 @@ struct Pdb
         return m_hop_num;
     }
 
+    int balance_pct() const
+    {
+        return m_balance_pct;
+    }
+
 private:
     void ensure( int ObjId )
     {
@@ -85,6 +96,7 @@ private:
     int m_num_parts = -1;
     int m_cut_size = -1;
     int m_hop_num = -1;
+    int m_balance_pct = -1;
 };
 
 ABC_NAMESPACE_CXX_HEADER_END
